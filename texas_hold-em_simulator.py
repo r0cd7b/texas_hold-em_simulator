@@ -2,7 +2,6 @@ import random
 
 
 class Card:
-    """
     ranks = {
         '2': (1,),
         '3': (2,),
@@ -14,12 +13,6 @@ class Card:
         '9': (8,),
         '10': (9,),
         'J': (10,),
-        'Q': (11,),
-        'K': (12,),
-        'A': (0, 13)
-    }
-    """
-    ranks = {
         'Q': (11,),
         'K': (12,),
         'A': (0, 13)
@@ -125,7 +118,7 @@ hands = {
 }
 for i in range(players):
     seven_cards = hole[i] + community
-    best_five, hand = seek_best(seven_cards)
     print(seven_cards)
+    best_five, hand = seek_best(seven_cards)
     print(best_five, hand)
     print()
