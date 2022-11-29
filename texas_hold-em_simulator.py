@@ -3,6 +3,7 @@ from collections import deque
 
 
 class Card:
+    """
     ranks = {
         '2': (1,),
         '3': (2,),
@@ -14,6 +15,12 @@ class Card:
         '9': (8,),
         '10': (9,),
         'J': (10,),
+        'Q': (11,),
+        'K': (12,),
+        'A': (0, 13)
+    }
+    """
+    ranks = {
         'Q': (11,),
         'K': (12,),
         'A': (0, 13)
@@ -64,6 +71,23 @@ def seek_best(seven_cards_):
                 five = -1
 
     # Four of a kind 찾기
+    seven_cards_.sort(key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
+    starting, stopping = 0, len(seven_cards_) - 4
+    for i_ in range(1, len(seven_cards_)):
+        previous_i = i_ - 1
+        if seven_cards_[previous_i].rank == seven_cards_[i_].rank:
+            next_i = i_ + 1
+            if next_i - starting == 4:
+                if starting == 0:
+                    return seven_cards_[starting:starting + 5], 'Four of a kind'
+                else:
+                    best_five_ = seven_cards_[starting:starting + 4]
+                    best_five_.append(seven_cards_[0])
+                    return best_five_, 'Four of a kind'
+        elif i_ > stopping:
+            break
+        else:
+            starting = i_
 
     return [], ''
 
@@ -103,5 +127,6 @@ hands = {
 for i in range(players):
     seven_cards = hole[i] + community
     best_five, hand = seek_best(seven_cards)
-    if best_five:
-        print(best_five)
+    print(seven_cards)
+    print(best_five, hand)
+    print()
