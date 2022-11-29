@@ -81,7 +81,7 @@ def seek_best(seven_cards_):
         else:
             starting = i_
 
-    return [], ''
+    return seven_cards_[:5], 'High card'
 
 
 players = 2
