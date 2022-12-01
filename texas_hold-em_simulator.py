@@ -1,9 +1,13 @@
 import random
-import timeit
+import time
 
 
 class Card:
-    # '♠': 0, '♣': 1, '♥': 2, '♦': 3
+    """
+    ranks = {'A': (0, 13), '2': (1,), '3': (2,), '4': (3,), '5': (4,), '6': (5,), '7': (6,), '8': (7,), '9': (8,),
+             '10': (9,), 'J': (10,), 'Q': (11,), 'K': (12,)}
+    suits = {'♠': 0, '♣': 1, '♥': 2, '♦': 3}
+    """
     ranks = {'A': (0, 13), '2': (1,), '3': (2,), '4': (3,), '5': (4,), '6': (5,), '7': (6,), '8': (7,), '9': (8,),
              '10': (9,), 'J': (10,), 'Q': (11,), 'K': (12,)}
     suits = {'♠': 0, '♣': 1, '♥': 2, '♦': 3}
@@ -16,66 +20,72 @@ class Card:
         return self.rank + self.suit
 
 
-def seek_best(seven_cards_):
+def seek_best(hand):
     # Straight flush 찾기
-    seven_cards_.sort(key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
-    best_ = [seven_cards_[0]]
-    for i_ in range(1, len(seven_cards_)):
-        if seven_cards_[i_].suit == best_[-1].suit and Card.ranks[seven_cards_[i_].rank][-1] == \
-                Card.ranks[best_[-1].rank][-1] - 1:
-            best_.append(seven_cards_[i_])
-            if len(best_) == 5:
-                return best_, 'Straight flush'
-        elif i_ <= len(seven_cards_) - 5:
-            best_ = [seven_cards_[i_]]
+    suit_highest = sorted(hand, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
+    stopping = len(hand) - 5
+
+    i_ = 0
+    while i_ <= stopping:
+        for j in range(i_, i_ + 4):
+            if Card.ranks[suit_highest[j].rank][0] != Card.ranks[suit_highest[j + 1].rank][0] + 1 or \
+                    suit_highest[j].suit != suit_highest[j + 1].suit:
+                i_ = j + 1
+                break
         else:
-            break
+            return suit_highest[i_:i_ + 5], 'Straight flush'
 
     # Lowest straight flush 찾기
-    suit_a_0 = sorted(seven_cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True)
-    best_ = []
-    for i_, card in enumerate(suit_a_0):
-        if card.rank == '5':
-            if i_ <= len(seven_cards_) - 5:
-                best_ = [card]
-            else:
-                break
-        elif best_ and card.suit == best_[-1].suit and Card.ranks[card.rank][0] == \
-                Card.ranks[best_[-1].rank][0] - 1:
-            best_.append(card)
-            if len(best_) == 5:
-                return best_, 'Straight flush'
+    # suit_lowest = sorted(hand, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True)
+    # starting = -1
+    # for i_, card in enumerate(suit_lowest):
+    #     if card.rank == '5':
+    #         if i_ <= stopping:
+    #             starting = i_
+    #         else:
+    #             break
+    #     elif starting >= 0:
+    #         if Card.ranks[suit_lowest[i_].rank][0] == Card.ranks[suit_lowest[i_ - 1].rank][0] - 1 and \
+    #                 suit_lowest[i_].suit == suit_lowest[i_ - 1].suit:
+    #             if i_ + 1 - starting == 5:
+    #                 return suit_lowest[starting:i_ + 1], 'Straight flush'
+    #         else:
+    #             starting = -1
 
     # Four of a kind 찾기
-    # starting = 0
-    # a_high_suit = sorted(seven_cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
-    # best_.clear()
-    # while starting < 4:
-    #     for i in range(starting, 7):
+    highest_suit = sorted(hand, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
 
-    return seven_cards_[:5], 'High card'
+    return highest_suit[:5], 'High card'
 
 
-players = 2
+while True:
 
-cards = []
-for rank in Card.ranks:
-    for suit in Card.suits:
-        cards.append(Card())
+    players = 2
 
-random.shuffle(cards)
+    cards = []
+    for rank in Card.ranks:
+        for suit in Card.suits:
+            cards.append(Card())
 
-hands = tuple([cards.pop(), cards.pop()] for _ in range(players))
-cards.pop()
-community = [cards.pop(), cards.pop(), cards.pop()]
-cards.pop()
-community.append(cards.pop())
-cards.pop()
-community.append(cards.pop())
+    random.shuffle(cards)
 
-for i in range(players):
-    hands[i].extend(community)
-    print(hands[i])
-    best, hand = seek_best(hands[i])
-    print(best, hand)
-    print()
+    hands = tuple([cards.pop(), cards.pop()] for _ in range(players))
+    cards.pop()
+    community = [cards.pop(), cards.pop(), cards.pop()]
+    cards.pop()
+    community.append(cards.pop())
+    cards.pop()
+    community.append(cards.pop())
+
+    for i in range(players):
+        hands[i].extend(community)
+        t = time.perf_counter_ns()
+        best, name = seek_best(hands[i])
+        if name == 'Straight flush':
+            print(time.perf_counter_ns() - t)
+            print(name, best, hands[i])
+
+            break
+    else:
+        continue
+    break
