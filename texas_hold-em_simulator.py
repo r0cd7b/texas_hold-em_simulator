@@ -9,7 +9,8 @@ class Card:
     suits = {'♠': 0, '♣': 1, '♥': 2, '♦': 3}
 
     def __init__(self):
-        self.rank, self.suit = rank, suit
+        self.rank = rank
+        self.suit = suit
 
     def __repr__(self):
         return self.rank + self.suit
