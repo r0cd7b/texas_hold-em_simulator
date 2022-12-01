@@ -19,37 +19,37 @@ class Card:
 def seek_best(seven_cards_):
     # Straight flush 찾기
     seven_cards_.sort(key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
-    best_five_ = [seven_cards_[0]]
+    best_ = [seven_cards_[0]]
     for i_ in range(1, len(seven_cards_)):
-        if seven_cards_[i_].suit == best_five_[-1].suit and Card.ranks[seven_cards_[i_].rank][-1] == \
-                Card.ranks[best_five_[-1].rank][-1] - 1:
-            best_five_.append(seven_cards_[i_])
-            if len(best_five_) == 5:
-                return best_five_, 'Straight flush'
+        if seven_cards_[i_].suit == best_[-1].suit and Card.ranks[seven_cards_[i_].rank][-1] == \
+                Card.ranks[best_[-1].rank][-1] - 1:
+            best_.append(seven_cards_[i_])
+            if len(best_) == 5:
+                return best_, 'Straight flush'
         elif i_ <= len(seven_cards_) - 5:
-            best_five_ = [seven_cards_[i_]]
+            best_ = [seven_cards_[i_]]
         else:
             break
 
     # Lowest straight flush 찾기
-    best_five_ = []
-    for i_, card in enumerate(
-            sorted(seven_cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True)):
+    suit_a_0 = sorted(seven_cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True)
+    best_ = []
+    for i_, card in enumerate(suit_a_0):
         if card.rank == '5':
             if i_ <= len(seven_cards_) - 5:
-                best_five_ = [card]
+                best_ = [card]
             else:
                 break
-        elif best_five_ and card.suit == best_five_[-1].suit and Card.ranks[card.rank][0] == \
-                Card.ranks[best_five_[-1].rank][0] - 1:
-            best_five_.append(card)
-            if len(best_five_) == 5:
-                return best_five_, 'Straight flush'
+        elif best_ and card.suit == best_[-1].suit and Card.ranks[card.rank][0] == \
+                Card.ranks[best_[-1].rank][0] - 1:
+            best_.append(card)
+            if len(best_) == 5:
+                return best_, 'Straight flush'
 
     # Four of a kind 찾기
     # starting = 0
     # a_high_suit = sorted(seven_cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
-    # best_five_.clear()
+    # best_.clear()
     # while starting < 4:
     #     for i in range(starting, 7):
 
@@ -65,7 +65,7 @@ for rank in Card.ranks:
 
 random.shuffle(cards)
 
-holes = tuple([cards.pop(), cards.pop()] for _ in range(players))
+hands = tuple([cards.pop(), cards.pop()] for _ in range(players))
 cards.pop()
 community = [cards.pop(), cards.pop(), cards.pop()]
 cards.pop()
@@ -74,8 +74,8 @@ cards.pop()
 community.append(cards.pop())
 
 for i in range(players):
-    seven_cards = holes[i] + community
-    print(seven_cards)
-    best_five, hand = seek_best(seven_cards)
-    print(best_five, hand)
+    hands[i].extend(community)
+    print(hands[i])
+    best, hand = seek_best(hands[i])
+    print(best, hand)
     print()
