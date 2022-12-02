@@ -20,71 +20,90 @@ class Card:
         return self.rank + self.suit
 
 
-def seek_best(hand):
-    # Straight flush 찾기
-    suit_highest = sorted(hand, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
-    stopping = len(hand) - 5
-
-    i_ = 0
-    while i_ <= stopping:
+def seek_hand(cards_):
+    # Straight flush 검사
+    cards_.sort(key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
+    for i_ in range(len(cards_) - 4):
         for j in range(i_, i_ + 4):
-            if Card.ranks[suit_highest[j].rank][0] != Card.ranks[suit_highest[j + 1].rank][0] + 1 or \
-                    suit_highest[j].suit != suit_highest[j + 1].suit:
-                i_ = j + 1
+            if Card.ranks[cards_[j].rank][-1] != Card.ranks[cards_[j + 1].rank][-1] + 1 or cards_[j].suit != \
+                    cards_[j + 1].suit:
                 break
         else:
-            return suit_highest[i_:i_ + 5], 'Straight flush'
+            return cards_[i_:i_ + 5], 'Straight flush'
 
-    # Lowest straight flush 찾기
-    # suit_lowest = sorted(hand, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True)
-    # starting = -1
-    # for i_, card in enumerate(suit_lowest):
-    #     if card.rank == '5':
-    #         if i_ <= stopping:
-    #             starting = i_
-    #         else:
-    #             break
-    #     elif starting >= 0:
-    #         if Card.ranks[suit_lowest[i_].rank][0] == Card.ranks[suit_lowest[i_ - 1].rank][0] - 1 and \
-    #                 suit_lowest[i_].suit == suit_lowest[i_ - 1].suit:
-    #             if i_ + 1 - starting == 5:
-    #                 return suit_lowest[starting:i_ + 1], 'Straight flush'
-    #         else:
-    #             starting = -1
+    # Lowest straight flush 검사
+    cards_.sort(key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True)
+    for i_ in range(len(cards_) - 4):
+        if cards_[i_].rank == '5':
+            for j in range(i_, i_ + 4):
+                if Card.ranks[cards_[j].rank][0] != Card.ranks[cards_[j + 1].rank][0] + 1 or cards_[j].suit != \
+                        cards_[j + 1].suit:
+                    break
+            else:
+                return cards_[i_:i_ + 5], 'Four of a kind'
 
-    # Four of a kind 찾기
-    highest_suit = sorted(hand, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
+    # Four of a kind 검사
+    cards_.sort(key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
+    for i_ in range(len(cards_) - 3):
+        for j in range(i_, i_ + 3):
+            if Card.ranks[cards_[j].rank][-1] != Card.ranks[cards_[j + 1].rank][-1]:
+                break
+        else:
+            hand_ = cards_[i_:i_ + 4]
+            if i_ <= 0:
+                hand_.append(cards_[i_ + 4])
+            else:
+                hand_.append(cards_[0])
+            return hand_, 'Four of a kind'
 
-    return highest_suit[:5], 'High card'
+    # Full house 검사
+    hand_ = []
+    for length in (3, 2):
+        for i_ in range(len(cards_) - length + 1):
+            for j in range(i_, i_ + length - 1):
+                if Card.ranks[cards_[j].rank][-1] != Card.ranks[cards_[j + 1].rank][-1]:
+                    break
+            else:
+                end = i_ + length
+                hand_.extend(cards_[i_:end])
+                cards_ = cards_[:i_ + 1] + cards_[end:]
+                break
+        else:
+            break
+    else:
+        return hand_, 'Full house'
+
+    # Flush 검사
+    # 정렬 상태 2개만 쓰기 ((A가 높을 때, 문양), (A가 낮을 때, 문양))
+    # deque와 pop, append 방식으로 검사
+
+    return None, None
 
 
 while True:
-
     players = 2
 
-    cards = []
+    deck = []
     for rank in Card.ranks:
         for suit in Card.suits:
-            cards.append(Card())
+            deck.append(Card())
 
-    random.shuffle(cards)
+    random.shuffle(deck)
 
-    hands = tuple([cards.pop(), cards.pop()] for _ in range(players))
-    cards.pop()
-    community = [cards.pop(), cards.pop(), cards.pop()]
-    cards.pop()
-    community.append(cards.pop())
-    cards.pop()
-    community.append(cards.pop())
+    holes = tuple([deck.pop() for _ in range(2)] for _ in range(players))
+    deck.pop()
+    community = [deck.pop() for _ in range(3)]
+    for _ in range(2):
+        deck.pop()
+        community.append(deck.pop())
 
-    for i in range(players):
-        hands[i].extend(community)
+    for hole in holes:
+        cards = hole + community
         t = time.perf_counter_ns()
-        best, name = seek_best(hands[i])
-        if name == 'Straight flush':
+        hand, name = seek_hand(cards)
+        if name == 'Full house':
             print(time.perf_counter_ns() - t)
-            print(name, best, hands[i])
-
+            print(cards, hand, name)
             break
     else:
         continue
