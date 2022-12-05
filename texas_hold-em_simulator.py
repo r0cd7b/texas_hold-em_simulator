@@ -68,6 +68,8 @@ def seek_best(cards_):
     else:
         return 'Full house', hand_
 
+    # deque를 이용한 Full house 검사
+
     return None, None
 
 
