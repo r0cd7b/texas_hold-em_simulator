@@ -22,7 +22,7 @@ class Card:
 
 def seek_best(cards_):
     # Straight flush 검사
-    suit_highest, i = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True), 0
+    i, suit_highest = 0, sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
     while Card.ranks[suit_highest[i].rank][-1] > Card.ranks['5'][-1] and i <= 2:
         for j in range(i + 1, i + 5):
             if suit_highest[j].suit != suit_highest[j - 1].suit or Card.ranks[suit_highest[j].rank][-1] != \
@@ -31,7 +31,7 @@ def seek_best(cards_):
                 break
         else:
             return 'Straight flush', suit_highest[i:i + 5]
-    suit_lowest, i = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True), 0
+    i, suit_lowest = 0, sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True)
     while Card.ranks[suit_lowest[i].rank][0] <= Card.ranks['5'][0] and i <= 2:
         for j in range(i + 1, i + 5):
             if suit_lowest[j].suit != suit_lowest[j - 1].suit or Card.ranks[suit_lowest[j].rank][0] != \
