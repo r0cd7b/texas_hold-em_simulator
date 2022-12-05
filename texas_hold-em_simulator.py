@@ -1,6 +1,5 @@
 import random
 import time
-from collections import deque
 
 
 class Card:
@@ -21,72 +20,77 @@ class Card:
         return self.rank + self.suit
 
 
-def straight_flush(cards_, i):
-    j = 0
-    while Card.ranks[cards_[j].rank][i] > Card.ranks['5'][i] and j <= 2:
-        for k in range(j, j + 4):
-            next_ = k + 1
-            if cards_[k].suit != cards_[next_].suit or Card.ranks[cards_[k].rank][i] != \
-                    Card.ranks[cards_[next_].rank][i] + 1:
-                j = next_
-                break
-        else:
-            return cards_[j:j + 5], 'Straight flush'
-    return None
-
-
-def seek_hand(cards_):
+def seek_best(cards_):
     # Straight flush 검사
     suit_highest, i = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True), 0
     while Card.ranks[suit_highest[i].rank][-1] > Card.ranks['5'][-1] and i <= 2:
-        for k in range(i, i + 4):
-            next_ = k + 1
-            if suit_highest[k].suit != suit_highest[next_].suit or Card.ranks[suit_highest[k].rank][-1] != \
-                    Card.ranks[suit_highest[next_].rank][-1] + 1:
-                i = next_
+        for j in range(i + 1, i + 5):
+            if suit_highest[j].suit != suit_highest[j - 1].suit or Card.ranks[suit_highest[j].rank][-1] != \
+                    Card.ranks[suit_highest[j - 1].rank][-1] - 1:
+                i = j
                 break
         else:
-            return suit_highest[i:i + 5], 'Straight flush'
-    suit_lowest, i = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True), 0
-    while Card.ranks[suit_lowest[i].rank][-1] <= Card.ranks['5'][-1] and i <= 2:
-        for k in range(i, i + 4):
-            next_ = k + 1
-            if suit_lowest[k].suit != suit_lowest[next_].suit or Card.ranks[suit_lowest[k].rank][-1] != \
-                    Card.ranks[suit_lowest[next_].rank][-1] + 1:
-                i = next_
+            return 'Straight flush', suit_highest[i:i + 5]
+    suit_lowest, i = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True), 0
+    while Card.ranks[suit_lowest[i].rank][0] <= Card.ranks['5'][0] and i <= 2:
+        for j in range(i + 1, i + 5):
+            if suit_lowest[j].suit != suit_lowest[j - 1].suit or Card.ranks[suit_lowest[j].rank][0] != \
+                    Card.ranks[suit_lowest[j - 1].rank][0] - 1:
+                i = j
                 break
         else:
-            return suit_lowest[i:i + 5], 'Straight flush'
+            return 'Straight flush', suit_lowest[i:i + 5]
 
     # Four of a kind 검사
+    i, highest_suit = 0, sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
+    while i <= 3:
+        for j in range(i + 1, i + 4):
+            if highest_suit[j].rank != highest_suit[j - 1].rank:
+                i = j
+                break
+        else:
+            return 'Four of a kind', highest_suit[i:i + 4] + [(highest_suit[:i] + highest_suit[i + 4:])[0]]
+
+    # Full house 검사
+    rest, hand_ = highest_suit, []
+    for length in (3, 2):
+        i = 0
+        while i <= len(rest) - length:
+            for j in range(i + 1, i + length):
+                if rest[j].rank != rest[j - 1].rank:
+                    i = j
+                    break
+            else:
+                rest, hand_ = rest[:i] + rest[i + length:], hand_ + rest[i:i + length]
+                break
+        else:
+            break
+    else:
+        return 'Full house', hand_
 
     return None, None
 
 
 while True:
-    players = 2
-
     deck = []
     for rank in Card.ranks:
         for suit in Card.suits:
             deck.append(Card(rank, suit))
-
     random.shuffle(deck)
-
+    players = 2
     holes = tuple([deck.pop() for _ in range(2)] for _ in range(players))
     deck.pop()
     community = [deck.pop() for _ in range(3)]
     for _ in range(2):
         deck.pop()
         community.append(deck.pop())
-
     for hole in holes:
         cards = hole + community
         t = time.perf_counter_ns()
-        hand, name = seek_hand(cards)
-        if name == 'Straight flush':
+        name, hand = seek_best(cards)
+        if name:
             print(time.perf_counter_ns() - t)
-            print(cards, hand, name)
+            print(name, hand, cards)
             break
     else:
         continue
