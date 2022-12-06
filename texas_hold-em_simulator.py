@@ -1,5 +1,6 @@
 import random
 import time
+from collections import deque
 
 
 class Card:
@@ -52,23 +53,40 @@ def seek_best(cards_):
             return 'Four of a kind', highest_suit[i:i + 4] + [(highest_suit[:i] + highest_suit[i + 4:])[0]]
 
     # Full house 검사
-    rest, hand_ = highest_suit, []
-    for length in (3, 2):
-        i = 0
-        while i <= len(rest) - length:
-            for j in range(i + 1, i + length):
-                if rest[j].rank != rest[j - 1].rank:
-                    i = j
-                    break
-            else:
-                rest, hand_ = rest[:i] + rest[i + length:], hand_ + rest[i:i + length]
-                break
-        else:
-            break
-    else:
-        return 'Full house', hand_
+    # rest, hand_ = highest_suit, []
+    # for length in (3, 2):
+    #     i = 0
+    #     while i <= len(rest) - length:
+    #         for j in range(i + 1, i + length):
+    #             if rest[j].rank != rest[j - 1].rank:
+    #                 i = j
+    #                 break
+    #         else:
+    #             rest, hand_ = rest[:i] + rest[i + length:], hand_ + rest[i:i + length]
+    #             break
+    #     else:
+    #         break
+    # else:
+    #     return 'Full house', hand_
 
     # deque를 이용한 Full house 검사
+    rest, hand_ = deque(highest_suit), []
+    for to_be in (3, 5):
+        sub_hand = [rest.popleft()]
+        for _ in rest:
+            card = rest.popleft()
+            if card.rank == sub_hand[-1].rank:
+                sub_hand.append(card)
+                if len(sub_hand) == to_be:
+
+                    break
+            else:
+                rest.append(card)
+        else:
+            break
+        hand_.extend(sub_hand)
+    else:
+        return 'Full house', hand_
 
     return None, None
 
