@@ -179,7 +179,7 @@ for rank in Card.ranks:
     for suit in Card.suits:
         deck.append(Card(rank, suit))
 
-players = 2
+players = 4
 
 counter = Counter()
 for _ in range(100000):
