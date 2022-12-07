@@ -182,7 +182,7 @@ for rank in Card.ranks:
 players = 2
 
 counter = Counter()
-for _ in range(10000):
+for _ in range(100000):
     random.shuffle(deck)
 
     holes = tuple([deck.pop() for _ in range(2)] for _ in range(players))
@@ -208,4 +208,4 @@ for _ in range(10000):
 
 total = counter.total()
 for name, count in counter.most_common():
-    print(f'{name}: {count / total * 100:.2f}%')
+    print(f'{name}: {count / total * 100:.3f}%')
