@@ -1,5 +1,4 @@
 import random
-import time
 from collections import deque
 
 
@@ -22,73 +21,160 @@ class Card:
 
 
 def seek_best(cards_):
-    # Straight flush 검사
-    i, suit_highest = 0, sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
+    # High Straight flush
+    suit_highest = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
+    i = 0
     while Card.ranks[suit_highest[i].rank][-1] > Card.ranks['5'][-1] and i <= 2:
-        for j in range(i + 1, i + 5):
-            if suit_highest[j].suit != suit_highest[j - 1].suit or Card.ranks[suit_highest[j].rank][-1] != \
-                    Card.ranks[suit_highest[j - 1].rank][-1] - 1:
+        last = i + 5
+        for j in range(i + 1, last):
+            previous = j - 1
+            if Card.ranks[suit_highest[previous].rank][-1] - 1 != Card.ranks[suit_highest[j].rank][-1] or \
+                    suit_highest[j].suit != suit_highest[previous].suit:
                 i = j
                 break
         else:
-            return 'Straight flush', suit_highest[i:i + 5]
-    i, suit_lowest = 0, sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True)
+            return 'Straight flush', suit_highest[i:last]
+
+    # Lowest Straight flush
+    suit_lowest = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True)
+    i = 0
     while Card.ranks[suit_lowest[i].rank][0] <= Card.ranks['5'][0] and i <= 2:
-        for j in range(i + 1, i + 5):
-            if suit_lowest[j].suit != suit_lowest[j - 1].suit or Card.ranks[suit_lowest[j].rank][0] != \
-                    Card.ranks[suit_lowest[j - 1].rank][0] - 1:
+        last = i + 5
+        for j in range(i + 1, last):
+            previous = j - 1
+            if Card.ranks[suit_lowest[previous].rank][0] - 1 != Card.ranks[suit_lowest[j].rank][0] or \
+                    suit_lowest[j].suit != suit_lowest[previous].suit:
                 i = j
                 break
         else:
-            return 'Straight flush', suit_lowest[i:i + 5]
+            return 'Straight flush', suit_lowest[i:last]
 
-    # Four of a kind 검사
-    i, highest_suit = 0, sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
+    # Four of a kind
+    highest_suit = sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
+    i = 0
     while i <= 3:
-        for j in range(i + 1, i + 4):
-            if highest_suit[j].rank != highest_suit[j - 1].rank:
+        last = i + 4
+        for j in range(i + 1, last):
+            if highest_suit[j - 1].rank != highest_suit[j].rank:
                 i = j
                 break
         else:
-            return 'Four of a kind', highest_suit[i:i + 4] + [(highest_suit[:i] + highest_suit[i + 4:])[0]]
+            return 'Four of a kind', highest_suit[i:last] + (highest_suit[:i] + highest_suit[last:])[:1]
 
-    # Full house 검사
-    # rest, hand_ = highest_suit, []
-    # for length in (3, 2):
-    #     i = 0
-    #     while i <= len(rest) - length:
-    #         for j in range(i + 1, i + length):
-    #             if rest[j].rank != rest[j - 1].rank:
-    #                 i = j
-    #                 break
-    #         else:
-    #             rest, hand_ = rest[:i] + rest[i + length:], hand_ + rest[i:i + length]
-    #             break
-    #     else:
-    #         break
-    # else:
-    #     return 'Full house', hand_
-
-    # deque를 이용한 Full house 검사
-    rest, hand_ = deque(highest_suit), []
-    for to_be in (3, 5):
-        sub_hand = [rest.popleft()]
-        for _ in rest:
-            card = rest.popleft()
-            if card.rank == sub_hand[-1].rank:
-                sub_hand.append(card)
-                if len(sub_hand) == to_be:
-
+    # Full house
+    check = highest_suit
+    hand_ = []
+    for length in (3, 2):
+        i = 0
+        while i <= len(check) - length:
+            for j in range(i + 1, i + length):
+                if check[j - 1].rank != check[j].rank:
+                    i = j
                     break
             else:
-                rest.append(card)
+                hand_ += check[i:i + length]
+                check = check[:i] + check[i + length:]
+                break
         else:
             break
-        hand_.extend(sub_hand)
     else:
         return 'Full house', hand_
 
-    return None, None
+    # Flush
+    i = 0
+    while i <= 2:
+        last = i + 5
+        for j in range(i + 1, last):
+            if suit_highest[j - 1].suit != suit_highest[j].suit:
+                i = j
+                break
+        else:
+            return 'Flush', suit_highest[i:last]
+
+    # High Straight
+    hand_ = [highest_suit[0]]
+    i = 1
+    while i <= 2 + len(hand_):
+        if Card.ranks[hand_[-1].rank][-1] - 1 == Card.ranks[highest_suit[i].rank][-1]:
+            hand_.append(highest_suit[i])
+            if len(hand_) == 5:
+                return 'Straight', hand_
+        else:
+            hand_ = [highest_suit[i]]
+        i += 1
+
+    # Lowest Straight
+    lowest_suit = sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][0], card_.suit), reverse=True)
+    hand_ = [lowest_suit[0]]
+    i = 1
+    while i <= 2 + len(hand_):
+        if Card.ranks[hand_[-1].rank][0] - 1 == Card.ranks[lowest_suit[i].rank][0]:
+            hand_.append(lowest_suit[i])
+            if len(hand_) == 5:
+                return 'Straight', hand_
+        else:
+            hand_ = [lowest_suit[i]]
+        i += 1
+
+    # Three of a kind
+    check, hand_ = highest_suit.copy(), []
+    for length in (3, 1, 1):
+        i = 0
+        while i <= len(check) - length:
+            last = i + length
+            for j in range(i + 1, last):
+                if check[i].rank != check[j].rank:
+                    i = j
+                    break
+            else:
+                hand_.extend(check[i:last])
+                del check[i:last]
+                break
+        else:
+            break
+    else:
+        return 'Three of a kind', hand_
+
+    # Two pairs
+    check, hand_ = highest_suit.copy(), []
+    for length in (2, 2, 1):
+        i = 0
+        while i <= len(check) - length:
+            last = i + length
+            for j in range(i + 1, last):
+                if check[i].rank != check[j].rank:
+                    i = j
+                    break
+            else:
+                hand_.extend(check[i:last])
+                del check[i:last]
+                break
+        else:
+            break
+    else:
+        return 'Two pairs', hand_
+
+    # Pair
+    check, hand_ = highest_suit.copy(), []
+    for length in (2, 1, 1, 1):
+        i = 0
+        while i <= len(check) - length:
+            last = i + length
+            for j in range(i + 1, last):
+                if check[i].rank != check[j].rank:
+                    i = j
+                    break
+            else:
+                hand_.extend(check[i:last])
+                del check[i:last]
+                break
+        else:
+            break
+    else:
+        return 'Pair', hand_
+
+    # High card
+    return 'High card', highest_suit[:5]
 
 
 while True:
@@ -97,6 +183,7 @@ while True:
         for suit in Card.suits:
             deck.append(Card(rank, suit))
     random.shuffle(deck)
+
     players = 2
     holes = tuple([deck.pop() for _ in range(2)] for _ in range(players))
     deck.pop()
@@ -104,12 +191,13 @@ while True:
     for _ in range(2):
         deck.pop()
         community.append(deck.pop())
+
+    hands = {'High card': 0, 'Pair': 1, 'Two pairs': 2, 'Three of a kind': 3, 'Straight': 4, 'Flush': 5,
+             'Full house': 6, 'Four of a kind': 7, 'Straight flush': 8}
     for hole in holes:
         cards = hole + community
-        t = time.perf_counter_ns()
         name, hand = seek_best(cards)
-        if name:
-            print(time.perf_counter_ns() - t)
+        if name == 'Straight':
             print(name, hand, cards)
             break
     else:
