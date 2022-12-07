@@ -179,10 +179,10 @@ for rank in Card.ranks:
     for suit in Card.suits:
         deck.append(Card(rank, suit))
 
-players = 4
+players = 22
 
 counter = Counter()
-for _ in range(100000):
+for _ in range(10000):
     random.shuffle(deck)
 
     holes = tuple([deck.pop() for _ in range(2)] for _ in range(players))
