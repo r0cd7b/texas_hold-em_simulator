@@ -187,10 +187,10 @@ for _ in range(10000):
 
     holes = tuple([deck.pop() for _ in range(2)] for _ in range(players))
 
-    burns = [deck.pop()]
+    burn = [deck.pop()]
     community = [deck.pop() for _ in range(3)]
     for _ in range(2):
-        burns.append(deck.pop())
+        burn.append(deck.pop())
         community.append(deck.pop())
 
     for hole in holes:
@@ -201,8 +201,8 @@ for _ in range(10000):
     for hole in holes:
         while hole:
             deck.append(hole.pop())
-    while burns:
-        deck.append(burns.pop())
+    while burn:
+        deck.append(burn.pop())
     while community:
         deck.append(community.pop())
 
