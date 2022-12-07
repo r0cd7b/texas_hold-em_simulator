@@ -1,16 +1,13 @@
+from collections import Counter
 import random
-from collections import deque
 
 
 class Card:
-    """
     ranks = {'2': (1,), '3': (2,), '4': (3,), '5': (4,), '6': (5,), '7': (6,), '8': (7,), '9': (8,), '10': (9,),
              'J': (10,), 'Q': (11,), 'K': (12,), 'A': (0, 13)}
     suits = ('♠', '♣', '♥', '♦')
-    """
-    ranks = {'2': (1,), '3': (2,), '4': (3,), '5': (4,), '6': (5,), '7': (6,), '8': (7,), '9': (8,), '10': (9,),
-             'J': (10,), 'Q': (11,), 'K': (12,), 'A': (0, 13)}
-    suits = ('♠', '♣', '♥', '♦')
+    hands = {'High card': 0, 'Pair': 1, 'Two pairs': 2, 'Three of a kind': 3, 'Straight': 4, 'Flush': 5,
+             'Full house': 6, 'Four of a kind': 7, 'Straight flush': 8}
 
     def __init__(self, rank_, suit_):
         self.rank = rank_
@@ -24,7 +21,7 @@ def seek_best(cards_):
     # High Straight flush
     suit_highest = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
     i = 0
-    while Card.ranks[suit_highest[i].rank][-1] > Card.ranks['5'][-1] and i <= 2:
+    while Card.ranks[suit_highest[i].rank][-1] > Card.ranks['5'][-1] and i <= len(cards_) - 5:
         last = i + 5
         for j in range(i + 1, last):
             previous = j - 1
@@ -38,7 +35,7 @@ def seek_best(cards_):
     # Lowest Straight flush
     suit_lowest = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True)
     i = 0
-    while Card.ranks[suit_lowest[i].rank][0] <= Card.ranks['5'][0] and i <= 2:
+    while Card.ranks[suit_lowest[i].rank][0] <= Card.ranks['5'][0] and i <= len(cards_) - 5:
         last = i + 5
         for j in range(i + 1, last):
             previous = j - 1
@@ -52,7 +49,7 @@ def seek_best(cards_):
     # Four of a kind
     highest_suit = sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
     i = 0
-    while i <= 3:
+    while i <= len(cards_) - 4:
         last = i + 4
         for j in range(i + 1, last):
             if highest_suit[j - 1].rank != highest_suit[j].rank:
@@ -82,7 +79,7 @@ def seek_best(cards_):
 
     # Flush
     i = 0
-    while i <= 2:
+    while i <= len(cards_) - 5:
         last = i + 5
         for j in range(i + 1, last):
             if suit_highest[j - 1].suit != suit_highest[j].suit:
@@ -94,7 +91,7 @@ def seek_best(cards_):
     # High Straight
     hand_ = [highest_suit[0]]
     i = 1
-    while i <= 2 + len(hand_):
+    while i <= len(cards_) - 5 + len(hand_):
         if Card.ranks[hand_[-1].rank][-1] - 1 == Card.ranks[highest_suit[i].rank][-1]:
             hand_.append(highest_suit[i])
             if len(hand_) == 5:
@@ -107,7 +104,7 @@ def seek_best(cards_):
     lowest_suit = sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][0], card_.suit), reverse=True)
     hand_ = [lowest_suit[0]]
     i = 1
-    while i <= 2 + len(hand_):
+    while i <= len(cards_) - 5 + len(hand_):
         if Card.ranks[hand_[-1].rank][0] - 1 == Card.ranks[lowest_suit[i].rank][0]:
             hand_.append(lowest_suit[i])
             if len(hand_) == 5:
@@ -177,29 +174,38 @@ def seek_best(cards_):
     return 'High card', highest_suit[:5]
 
 
-while True:
-    deck = []
-    for rank in Card.ranks:
-        for suit in Card.suits:
-            deck.append(Card(rank, suit))
+deck = []
+for rank in Card.ranks:
+    for suit in Card.suits:
+        deck.append(Card(rank, suit))
+
+players = 2
+
+counter = Counter()
+for _ in range(10000):
     random.shuffle(deck)
 
-    players = 2
     holes = tuple([deck.pop() for _ in range(2)] for _ in range(players))
-    deck.pop()
+
+    burns = [deck.pop()]
     community = [deck.pop() for _ in range(3)]
     for _ in range(2):
-        deck.pop()
+        burns.append(deck.pop())
         community.append(deck.pop())
 
-    hands = {'High card': 0, 'Pair': 1, 'Two pairs': 2, 'Three of a kind': 3, 'Straight': 4, 'Flush': 5,
-             'Full house': 6, 'Four of a kind': 7, 'Straight flush': 8}
     for hole in holes:
         cards = hole + community
         name, hand = seek_best(cards)
-        if name == 'Straight':
-            print(name, hand, cards)
-            break
-    else:
-        continue
-    break
+        counter[name] += 1
+
+    for hole in holes:
+        while hole:
+            deck.append(hole.pop())
+    while burns:
+        deck.append(burns.pop())
+    while community:
+        deck.append(community.pop())
+
+total = counter.total()
+for name, count in counter.most_common():
+    print(f'{name}: {count / total * 100:.2f}%')
