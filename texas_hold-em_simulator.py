@@ -1,5 +1,6 @@
-from collections import Counter
+from collections import Counter, deque
 import random
+import timeit
 
 
 class Card:
@@ -21,30 +22,36 @@ def seek_best(cards_):
     # High Straight flush
     suit_highest = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
     i = 0
-    while Card.ranks[suit_highest[i].rank][-1] > Card.ranks['5'][-1] and i <= len(cards_) - 5:
-        last = i + 5
-        for j in range(i + 1, last):
-            previous = j - 1
-            if Card.ranks[suit_highest[previous].rank][-1] - 1 != Card.ranks[suit_highest[j].rank][-1] or \
-                    suit_highest[j].suit != suit_highest[previous].suit:
-                i = j
+    breakpoint_ = len(cards_) - 5
+    while Card.ranks[suit_highest[i].rank][-1] > Card.ranks['5'][-1] and i <= breakpoint_:
+        for j in range(i, i + 4):
+            next_ = j + 1
+            if Card.ranks[suit_highest[j].rank][-1] != Card.ranks[suit_highest[next_].rank][-1] + 1 or \
+                    suit_highest[j].suit != suit_highest[next_].suit:
+                i = next_
                 break
         else:
-            return 'Straight flush', suit_highest[i:last]
+            return 'Straight flush', suit_highest[i:i + 5]
+
+    # def f1():
+    #
+    # def f2():
+    #
+    # print(timeit.timeit(f1))
+    # print(timeit.timeit(f2))
 
     # Lowest Straight flush
     suit_lowest = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True)
     i = 0
-    while Card.ranks[suit_lowest[i].rank][0] <= Card.ranks['5'][0] and i <= len(cards_) - 5:
-        last = i + 5
-        for j in range(i + 1, last):
-            previous = j - 1
-            if Card.ranks[suit_lowest[previous].rank][0] - 1 != Card.ranks[suit_lowest[j].rank][0] or \
-                    suit_lowest[j].suit != suit_lowest[previous].suit:
-                i = j
+    while Card.ranks[suit_lowest[i].rank][0] == Card.ranks['5'][0] and i <= breakpoint_:
+        for j in range(i, i + 4):
+            next_ = j + 1
+            if Card.ranks[suit_lowest[j].rank][0] != Card.ranks[suit_lowest[next_].rank][0] + 1 or \
+                    suit_lowest[j].suit != suit_lowest[next_].suit:
+                i = next_
                 break
         else:
-            return 'Straight flush', suit_lowest[i:last]
+            return 'Straight flush', suit_lowest[i:i + 5]
 
     # Four of a kind
     highest_suit = sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
@@ -152,7 +159,25 @@ def seek_best(cards_):
         return 'Two pairs', hand_
 
     # Pair
-    check, hand_ = highest_suit.copy(), []
+    # check, hand_ = highest_suit.copy(), []
+    # for length in (2, 1, 1, 1):
+    #     i = 0
+    #     while i <= len(check) - length:
+    #         last = i + length
+    #         for j in range(i + 1, last):
+    #             if check[i].rank != check[j].rank:
+    #                 i = j
+    #                 break
+    #         else:
+    #             hand_.extend(check[i:last])
+    #             del check[i:last]
+    #             break
+    #     else:
+    #         break
+    # else:
+    #     return 'Pair', hand_
+
+    check, hand_ = deque(highest_suit), []
     for length in (2, 1, 1, 1):
         i = 0
         while i <= len(check) - length:
@@ -182,7 +207,7 @@ for rank in Card.ranks:
 players = 1
 
 counter = Counter()
-for _ in range(100000):
+for _ in range(1):
     random.shuffle(deck)
 
     holes = tuple([deck.pop() for _ in range(2)] for _ in range(players))
