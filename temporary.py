@@ -5,7 +5,7 @@ import time
 class Card:
     ranks = {'2': (1,), '3': (2,), '4': (3,), '5': (4,), '6': (5,), '7': (6,), '8': (7,), '9': (8,), '10': (9,),
              'J': (10,), 'Q': (11,), 'K': (12,), 'A': (0, 13)}
-    suits = ('♠', '♣')
+    suits = ('♠', '♣', '♥', '♦')
     hands = {'High card': 0, 'Pair': 1, 'Two pairs': 2, 'Three of a kind': 3, 'Straight': 4, 'Flush': 5,
              'Full house': 6, 'Four of a kind': 7, 'Straight flush': 8}
 
@@ -18,27 +18,26 @@ class Card:
 
 
 def seek_best(cards_):
-    # 5500
-    lowest = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][0], reverse=True)
-    hand_ = None
-    for card in lowest:
+    a_low = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][0], reverse=True)
+    hand_ = []
+    for i, card in enumerate(a_low):
         rank_card = Card.ranks[card.rank][0]
-        if hand_ is None:
+        if len(hand_) == 0:
             if rank_card == Card.ranks['5'][-1]:
                 hand_ = [card]
             else:
                 break
         else:
             end_hand = hand_[-1]
-            rank_hand = Card.ranks[end_hand.rank][0] - 1
-            comparison = rank_hand - rank_card
-            if comparison == 0 and end_hand.suit == card.suit:
+            comparison = Card.ranks[end_hand.rank][0] - rank_card - 1
+            if comparison == 0 and card.suit == end_hand.suit:
                 hand_.append(card)
                 if len(hand_) == 5:
                     return 'Straight flush', hand_
             elif comparison > 0:
-                hand_ = None
-
+                hand_.clear()
+        if len(a_low) - (i + 1) < 5 - len(hand_):
+            break
     return None, None
 
 
