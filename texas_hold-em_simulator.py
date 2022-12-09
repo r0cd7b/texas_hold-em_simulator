@@ -19,34 +19,46 @@ class Card:
 
 def seek_best(cards_):
     # High Straight flush
-    suit_highest, i = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True), 0
-    while Card.ranks[suit_highest[i].rank][-1] > Card.ranks['5'][-1]:
-        hand_, j = [suit_highest[i]], i + 1
-        while Card.ranks[hand_[-1].rank][-1] - 1 == Card.ranks[suit_highest[j].rank][-1] and hand_[-1].suit == \
-                suit_highest[j].suit:
-            hand_.append(suit_highest[j])
-            if len(hand_) == 5:
-                return 'Straight flush', hand_
-            j += 1
-        else:
-            if j > len(cards_) - 5:
+    high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][0], reverse=True)
+    hand_ = None
+    for card in high:
+        rank_card = Card.ranks[card.rank][0]
+        if hand_ is None:
+            if rank_card > Card.ranks['5'][-1]:
+                hand_ = [card]
+            else:
                 break
-            i = j
+        else:
+            end_hand = hand_[-1]
+            rank_hand = Card.ranks[end_hand.rank][0] - 1
+            comparison = rank_hand - rank_card
+            if comparison == 0 and end_hand.suit == card.suit:
+                hand_.append(card)
+                if len(hand_) == 5:
+                    return 'Straight flush', hand_
+            elif comparison > 0:
+                hand_ = None
 
     # Lowest Straight flush
-    suit_lowest, i = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True), 0
-    while Card.ranks[suit_lowest[i].rank][0] == Card.ranks['5'][0]:
-        hand_, j = [suit_lowest[i]], i + 1
-        while Card.ranks[hand_[-1].rank][0] - 1 == Card.ranks[suit_lowest[j].rank][0] and hand_[-1].suit == \
-                suit_lowest[j].suit:
-            hand_.append(suit_lowest[j])
-            if len(hand_) == 5:
-                return 'Straight flush', hand_
-            j += 1
-        else:
-            if j > len(cards_) - 5:
+    low = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][0], reverse=True)
+    hand_ = None
+    for card in low:
+        rank_card = Card.ranks[card.rank][0]
+        if hand_ is None:
+            if rank_card == Card.ranks['5'][-1]:
+                hand_ = [card]
+            else:
                 break
-            i = j
+        else:
+            end_hand = hand_[-1]
+            rank_hand = Card.ranks[end_hand.rank][0] - 1
+            comparison = rank_hand - rank_card
+            if comparison == 0 and end_hand.suit == card.suit:
+                hand_.append(card)
+                if len(hand_) == 5:
+                    return 'Straight flush', hand_
+            elif comparison > 0:
+                hand_ = None
 
     # Four of a kind
     i, highest_suit = 0, sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)

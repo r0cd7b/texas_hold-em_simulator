@@ -5,7 +5,7 @@ import time
 class Card:
     ranks = {'2': (1,), '3': (2,), '4': (3,), '5': (4,), '6': (5,), '7': (6,), '8': (7,), '9': (8,), '10': (9,),
              'J': (10,), 'Q': (11,), 'K': (12,), 'A': (0, 13)}
-    suits = ('♠', '♣', '♥', '♦')
+    suits = ('♠', '♣')
     hands = {'High card': 0, 'Pair': 1, 'Two pairs': 2, 'Three of a kind': 3, 'Straight': 4, 'Flush': 5,
              'Full house': 6, 'Four of a kind': 7, 'Straight flush': 8}
 
@@ -18,38 +18,26 @@ class Card:
 
 
 def seek_best(cards_):
-    # 4900
-    # suit_highest, i = sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True), 0
-    # while Card.ranks[suit_highest[i].rank][-1] > Card.ranks['5'][-1]:
-    #     hand_ = [suit_highest[i]]
-    #     while True:
-    #         i += 1
-    #         condition = Card.ranks[hand_[-1].rank][-1] - Card.ranks[suit_highest[i].rank][-1] - 1
-    #         if condition == 0:
-    #             hand_.append(suit_highest[i])
-    #             if len(hand_) == 5:
-    #                 return 'Straight flush', hand_
-    #         elif condition > 0:
-    #             break
-    #     if i > len(cards_) - 5:
-    #         break
-
-    # 5900
-    suit_highest, i, breakpoint_ = sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit),
-                                          reverse=True), 0, len(cards_) - 5
-    while i <= breakpoint_ and Card.ranks[suit_highest[i].rank][-1] > Card.ranks['5'][-1]:
-        hand_ = [suit_highest[i]]
-        while True:
-            i += 1
-            condition = Card.ranks[hand_[-1].rank][-1] - Card.ranks[suit_highest[i].rank][-1] - 1
-            if condition == 0:
-                hand_.append(suit_highest[i])
+    # 5500
+    lowest = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][0], reverse=True)
+    hand_ = None
+    for card in lowest:
+        rank_card = Card.ranks[card.rank][0]
+        if hand_ is None:
+            if rank_card == Card.ranks['5'][-1]:
+                hand_ = [card]
+            else:
+                break
+        else:
+            end_hand = hand_[-1]
+            rank_hand = Card.ranks[end_hand.rank][0] - 1
+            comparison = rank_hand - rank_card
+            if comparison == 0 and end_hand.suit == card.suit:
+                hand_.append(card)
                 if len(hand_) == 5:
                     return 'Straight flush', hand_
-            elif condition > 0:
-                break
-            if i - len(hand_) <= breakpoint_:
-                break
+            elif comparison > 0:
+                hand_ = None
 
     return None, None
 
@@ -63,7 +51,7 @@ name = None
 while True:
     random.shuffle(deck)
 
-    holes = tuple([deck.pop() for _ in range(2)] for _ in range(22))
+    holes = tuple([deck.pop() for _ in range(2)] for _ in range(1))
     burn = [deck.pop()]
     community = [deck.pop() for _ in range(3)]
     for _ in range(2):
