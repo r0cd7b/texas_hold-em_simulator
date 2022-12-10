@@ -6,8 +6,6 @@ class Card:
     ranks = {'2': (1,), '3': (2,), '4': (3,), '5': (4,), '6': (5,), '7': (6,), '8': (7,), '9': (8,), '10': (9,),
              'J': (10,), 'Q': (11,), 'K': (12,), 'A': (0, 13)}
     suits = ('♠', '♣', '♥', '♦')
-    hands = {'High card': 0, 'Pair': 1, 'Two pairs': 2, 'Three of a kind': 3, 'Straight': 4, 'Flush': 5,
-             'Full house': 6, 'Four of a kind': 7, 'Straight flush': 8}
 
     def __init__(self, rank_, suit_):
         self.rank = rank_
@@ -18,26 +16,26 @@ class Card:
 
 
 def seek_best(cards_):
-    a_low = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][0], reverse=True)
+    a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
     hand_ = []
-    for i, card in enumerate(a_low):
-        rank_card = Card.ranks[card.rank][0]
-        if len(hand_) == 0:
-            if rank_card == Card.ranks['5'][-1]:
-                hand_ = [card]
-            else:
-                break
+
+    # 5900
+    i = 0
+    hand_.clear()
+    for j in range(1, len(a_high)):
+        next_ = j + 1
+        if Card.ranks[a_high[i].rank][-1] == Card.ranks[a_high[j].rank][-1]:
+            if next_ - 4 == i:
+                rest = a_high[:i]
+                rest.extend(a_high[next_:])
+                hand_ = a_high[i:next_]
+                hand_.append(rest[0])
+                return 'Four of a kind', hand_
         else:
-            end_hand = hand_[-1]
-            comparison = Card.ranks[end_hand.rank][0] - rank_card - 1
-            if comparison == 0 and card.suit == end_hand.suit:
-                hand_.append(card)
-                if len(hand_) == 5:
-                    return 'Straight flush', hand_
-            elif comparison > 0:
-                hand_.clear()
-        if len(a_low) - (i + 1) < 5 - len(hand_):
+            i = j
+        if len(a_high) - next_ < 4 - len(hand_):
             break
+
     return None, None
 
 
