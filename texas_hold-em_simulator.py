@@ -23,16 +23,16 @@ def seek_best(cards_):
     hand_ = [a_high[0]]
     for i in range(1, len(a_high)):
         first = hand_[0]
-        rank_ = Card.ranks[first.rank][-1]
-        if rank_ <= Card.ranks['5'][-1]:
+        rank_first = Card.ranks[first.rank][-1]
+        if rank_first <= Card.ranks['5'][-1]:
             break
         new = a_high[i]
-        comparison = rank_ - len(hand_) - Card.ranks[new.rank][-1]
-        if comparison == 0 and first.suit == new.suit:
+        difference = rank_first - Card.ranks[new.rank][-1]
+        if difference == len(hand_) and first.suit == new.suit:
             hand_.append(new)
             if len(hand_) == 5:
                 return 'Straight flush', hand_
-        elif comparison > 0:
+        elif difference != 0:
             hand_.clear()
             hand_.append(new)
 
@@ -41,23 +41,23 @@ def seek_best(cards_):
     hand_ = [a_low[0]]
     for i in range(1, len(a_low)):
         first = hand_[0]
-        rank_ = Card.ranks[first.rank][0]
-        if rank_ != Card.ranks['5'][-1]:
+        rank_first = Card.ranks[first.rank][0]
+        if rank_first != Card.ranks['5'][0]:
             break
         new = a_low[i]
-        comparison = rank_ - len(hand_) - Card.ranks[new.rank][0]
-        if comparison == 0 and first.suit == new.suit:
+        difference = rank_first - Card.ranks[new.rank][0]
+        if difference == len(hand_) and first.suit == new.suit:
             hand_.append(new)
             if len(hand_) == 5:
                 return 'Straight flush', hand_
-        elif comparison > 0:
+        elif difference != 0:
             hand_.clear()
             hand_.append(new)
 
     # Four of a kind
-    length, i = len(a_high), 0
+    i = 0
     hand_.clear()
-    for j in range(1, length):
+    for j in range(1, len(a_high)):
         next_ = j + 1
         if Card.ranks[a_high[i].rank][-1] == Card.ranks[a_high[j].rank][-1]:
             if i + 4 == next_:
@@ -69,10 +69,25 @@ def seek_best(cards_):
                 return 'Four of a kind', hand_
         else:
             i = j
-        if length - next_ < 4 - len(hand_):
+        if len(a_high) - next_ < 4 - len(hand_):
             break
 
     # Full house
+    i = 0
+    for j in range(1, len(a_high)):
+        next_ = j + 1
+        if Card.ranks[a_high[i].rank][-1] == Card.ranks[a_high[j].rank][-1]:
+            if i + 4 == next_:
+                hand_ = a_high[i:next_]
+                if i == 0:
+                    hand_.append(a_high[next_])
+                else:
+                    hand_.append(a_high[0])
+                return 'Four of a kind', hand_
+        else:
+            i = j
+        if len(a_high) - next_ < 4 - len(hand_):
+            break
 
     # Flush
 

@@ -27,8 +27,8 @@ def seek_best(cards_):
     # print(timeit.timeit(f1))
     # print(timeit.timeit(f2))
 
-    length, i = len(a_high), 0
-    for j in range(1, length):
+    i = 0
+    for j in range(1, len(a_high)):
         next_ = j + 1
         if Card.ranks[a_high[i].rank][-1] == Card.ranks[a_high[j].rank][-1]:
             if i + 4 == next_:
@@ -40,7 +40,7 @@ def seek_best(cards_):
                 return 'Four of a kind', hand_
         else:
             i = j
-        if length - next_ < 4 - len(hand_):
+        if len(a_high) - next_ < 4 - len(hand_):
             break
 
     return None, None
