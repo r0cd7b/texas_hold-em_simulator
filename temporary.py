@@ -18,22 +18,23 @@ class Card:
 def seek_best(cards_):
     a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
     hand_ = []
-
-    # 5900
-    i = 0
-    hand_.clear()
-    for j in range(1, len(a_high)):
-        next_ = j + 1
-        if Card.ranks[a_high[i].rank][-1] == Card.ranks[a_high[j].rank][-1]:
-            if next_ - 4 == i:
-                rest = a_high[:i]
-                rest.extend(a_high[next_:])
-                hand_ = a_high[i:next_]
-                hand_.append(rest[0])
-                return 'Four of a kind', hand_
+    for i, card in enumerate(a_high):
+        rank_card = Card.ranks[card.rank][-1]
+        if len(hand_) == 0:
+            if rank_card > Card.ranks['5'][-1]:
+                hand_.append(card)
+            else:
+                break
         else:
-            i = j
-        if len(a_high) - next_ < 4 - len(hand_):
+            first = hand_[0]
+            comparison = Card.ranks[first.rank][-1] - rank_card - len(hand_)
+            if comparison == 0 and first.suit == card.suit:
+                hand_.append(card)
+                if len(hand_) == 5:
+                    return 'Straight flush', hand_
+            elif comparison > 0:
+                hand_.clear()
+        if len(a_high) - (i + 1) < 5 - len(hand_):
             break
 
     return None, None

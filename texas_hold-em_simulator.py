@@ -29,9 +29,9 @@ def seek_best(cards_):
             else:
                 break
         else:
-            end_hand = hand_[-1]
-            comparison = Card.ranks[end_hand.rank][-1] - rank_card - 1
-            if comparison == 0 and card.suit == end_hand.suit:
+            first = hand_[0]
+            comparison = Card.ranks[first.rank][-1] - rank_card - len(hand_)
+            if comparison == 0 and first.suit == card.suit:
                 hand_.append(card)
                 if len(hand_) == 5:
                     return 'Straight flush', hand_
@@ -51,9 +51,9 @@ def seek_best(cards_):
             else:
                 break
         else:
-            end_hand = hand_[-1]
-            comparison = Card.ranks[end_hand.rank][0] - rank_card - 1
-            if comparison == 0 and card.suit == end_hand.suit:
+            first = hand_[0]
+            comparison = Card.ranks[first.rank][-1] - rank_card - len(hand_)
+            if comparison == 0 and first.suit == card.suit:
                 hand_.append(card)
                 if len(hand_) == 5:
                     return 'Straight flush', hand_
@@ -68,11 +68,12 @@ def seek_best(cards_):
     for j in range(1, len(a_high)):
         next_ = j + 1
         if Card.ranks[a_high[i].rank][-1] == Card.ranks[a_high[j].rank][-1]:
-            if next_ - 4 == i:
-                rest = a_high[:i]
-                rest.extend(a_high[next_:])
+            if i + 4 == next_:
                 hand_ = a_high[i:next_]
-                hand_.append(rest[0])
+                if i == 0:
+                    hand_.append(a_high[next_])
+                else:
+                    hand_.append(a_high[0])
                 return 'Four of a kind', hand_
         else:
             i = j
@@ -80,6 +81,7 @@ def seek_best(cards_):
             break
 
     # Full house
+
 
     # Flush
 
