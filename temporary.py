@@ -1,5 +1,6 @@
 import random
 import time
+import timeit
 
 
 class Card:
@@ -18,23 +19,28 @@ class Card:
 def seek_best(cards_):
     a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
     hand_ = []
-    for i, card in enumerate(a_high):
-        rank_card = Card.ranks[card.rank][-1]
-        if len(hand_) == 0:
-            if rank_card > Card.ranks['5'][-1]:
-                hand_.append(card)
-            else:
-                break
+
+    # def f1():
+    #
+    # def f2():
+    #
+    # print(timeit.timeit(f1))
+    # print(timeit.timeit(f2))
+
+    length, i = len(a_high), 0
+    for j in range(1, length):
+        next_ = j + 1
+        if Card.ranks[a_high[i].rank][-1] == Card.ranks[a_high[j].rank][-1]:
+            if i + 4 == next_:
+                hand_ = a_high[i:next_]
+                if i == 0:
+                    hand_.append(a_high[next_])
+                else:
+                    hand_.append(a_high[0])
+                return 'Four of a kind', hand_
         else:
-            first = hand_[0]
-            comparison = Card.ranks[first.rank][-1] - rank_card - len(hand_)
-            if comparison == 0 and first.suit == card.suit:
-                hand_.append(card)
-                if len(hand_) == 5:
-                    return 'Straight flush', hand_
-            elif comparison > 0:
-                hand_.clear()
-        if len(a_high) - (i + 1) < 5 - len(hand_):
+            i = j
+        if length - next_ < 4 - len(hand_):
             break
 
     return None, None
