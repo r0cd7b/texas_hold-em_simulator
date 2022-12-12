@@ -37,7 +37,7 @@ def seek_best(cards_):
 
     # Lowest Straight flush
     a_low = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][0], reverse=True)
-    if Card.ranks[a_low[0].rank][0] > Card.ranks['5'][0]:
+    if Card.ranks[a_low[0].rank][0] == Card.ranks['5'][0]:
         hand_ = [a_low[0]]
         for i_ in range(1, len(cards_)):
             if Card.ranks[a_low[i_].rank][0] == Card.ranks[hand_[-1].rank][0] - 1 and a_high[i_].suit == hand_[-1].suit:
@@ -45,7 +45,7 @@ def seek_best(cards_):
                 if len(hand_) == 5:
                     return 'Straight flush', hand_
             elif Card.ranks[a_low[i_].rank][0] < Card.ranks[hand_[-1].rank][0] - 1:
-                if Card.ranks[a_low[i_].rank][0] <= Card.ranks['5'][0]:
+                if Card.ranks[a_low[i_].rank][0] != Card.ranks['5'][0]:
                     break
                 hand_ = [a_low[i_]]
             if len(cards_) - (i_ + 1) < 5 - len(hand_):
@@ -59,8 +59,8 @@ def seek_best(cards_):
             if len(hand_) == 4:
                 return 'Four of a kind', hand_ + (a_high[:i_ - 3] + a_high[i_ + 1:i_ + 2])[:1]
         else:
-            hand_ = [a_high[0]]
-        if len(cards_) - (i_ + 1) < 4 - len(hand_):
+            hand_ = [a_high[i_]]
+        if len(cards_) - (i_ + 1) < 5 - len(hand_):
             break
 
     # Full house
