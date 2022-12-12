@@ -20,74 +20,96 @@ class Card:
 def seek_best(cards_):
     # High Straight flush
     a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
-    hand_ = [a_high[0]]
-    for i in range(1, len(a_high)):
-        first = hand_[0]
-        rank_first = Card.ranks[first.rank][-1]
-        if rank_first <= Card.ranks['5'][-1]:
-            break
-        new = a_high[i]
-        difference = rank_first - Card.ranks[new.rank][-1]
-        if difference == len(hand_) and first.suit == new.suit:
-            hand_.append(new)
-            if len(hand_) == 5:
-                return 'Straight flush', hand_
-        elif difference != 0:
-            hand_.clear()
-            hand_.append(new)
+    first = a_high[0]
+    rank_five = Card.ranks['5'][-1]
+    if Card.ranks[first.rank][-1] > rank_five:
+        hand_ = [first]
+        for i_ in range(1, len(a_high)):
+            current = a_high[i_]
+            previous = hand_[-1]
+            rank_current = Card.ranks[current.rank][-1]
+            compare = rank_current - Card.ranks[previous.rank][-1] + 1
+            if compare == 0 and current.suit == previous.suit:
+                hand_.append(current)
+                if len(hand_) == 5:
+                    return 'Straight flush', hand_
+            elif compare < 0:
+                if rank_current <= rank_five:
+                    break
+                hand_.clear()
+                hand_.append(current)
+            if len(a_high) - (i_ + 1) < 5 - len(hand_):
+                break
 
     # Lowest Straight flush
     a_low = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][0], reverse=True)
-    hand_ = [a_low[0]]
-    for i in range(1, len(a_low)):
-        first = hand_[0]
-        rank_first = Card.ranks[first.rank][0]
-        if rank_first != Card.ranks['5'][0]:
-            break
-        new = a_low[i]
-        difference = rank_first - Card.ranks[new.rank][0]
-        if difference == len(hand_) and first.suit == new.suit:
-            hand_.append(new)
-            if len(hand_) == 5:
-                return 'Straight flush', hand_
-        elif difference != 0:
-            hand_.clear()
-            hand_.append(new)
+    first = a_low[0]
+    rank_five = Card.ranks['5'][0]
+    if Card.ranks[first.rank][0] == rank_five:
+        hand_ = [first]
+        for i_ in range(1, len(a_low)):
+            current = a_low[i_]
+            previous = hand_[-1]
+            rank_current = Card.ranks[current.rank][0]
+            compare = rank_current - Card.ranks[previous.rank][0] + 1
+            if compare == 0 and current.suit == previous.suit:
+                hand_.append(current)
+                if len(hand_) == 5:
+                    return 'Straight flush', hand_
+            elif compare < 0:
+                if rank_current != rank_five:
+                    break
+                hand_.clear()
+                hand_.append(current)
+            if len(a_low) - (i_ + 1) < 5 - len(hand_):
+                break
 
     # Four of a kind
-    i = 0
-    hand_.clear()
-    for j in range(1, len(a_high)):
-        next_ = j + 1
-        if Card.ranks[a_high[i].rank][-1] == Card.ranks[a_high[j].rank][-1]:
-            if i + 4 == next_:
-                hand_ = a_high[i:next_]
-                if i == 0:
-                    hand_.append(a_high[next_])
+    hand_ = [a_high[0]]
+    for i_ in range(1, len(a_high)):
+        current = a_high[i_]
+        j = i_ + 1
+        if Card.ranks[current.rank][-1] == Card.ranks[hand_[-1].rank][-1]:
+            hand_.append(current)
+            if len(hand_) == 4:
+                k = i_ - 3
+                hand_ = a_high[k:j]
+                if k == 0:
+                    hand_.append(a_high[j])
                 else:
                     hand_.append(a_high[0])
                 return 'Four of a kind', hand_
         else:
-            i = j
-        if len(a_high) - next_ < 4 - len(hand_):
+            hand_.clear()
+            hand_.append(current)
+        if len(a_high) - j < 4 - len(hand_):
             break
 
     # Full house
-    i = 0
-    for j in range(1, len(a_high)):
-        next_ = j + 1
-        if Card.ranks[a_high[i].rank][-1] == Card.ranks[a_high[j].rank][-1]:
-            if i + 4 == next_:
-                hand_ = a_high[i:next_]
-                if i == 0:
-                    hand_.append(a_high[next_])
-                else:
-                    hand_.append(a_high[0])
-                return 'Four of a kind', hand_
+    hand_.clear()
+    hand_.append(a_high[0])
+    sub_hand = []
+    for i_ in range(1, len(a_high)):
+        current = a_high[i_]
+        length_sub = len(sub_hand)
+        if Card.ranks[current.rank][-1] == Card.ranks[hand_[-1].rank][-1]:
+            hand_.append(current)
+            length_hand = len(hand_)
+            if length_hand == 5:
+                return 'Full house', hand_
+            if length_hand == 3 and length_sub == 2:
+                hand_.extend(sub_hand)
+                return 'Full house', hand_
         else:
-            i = j
-        if len(a_high) - next_ < 4 - len(hand_):
-            break
+            length_hand = len(hand_)
+            if length_hand in (4, 1):
+                hand_.pop()
+            elif length_hand == 2:
+                if length_sub == 0:
+                    for card in hand_:
+                        sub_hand.append(card)
+                hand_.clear()
+            hand_.append(current)
 
     # Flush
 
@@ -112,7 +134,7 @@ for rank in Card.ranks:
 
 players = 22
 counter = Counter()
-for _ in range(10000):
+for i in range(10000):
     random.shuffle(deck)
 
     holes = tuple([deck.pop() for _ in range(2)] for _ in range(players))

@@ -1,6 +1,4 @@
 import random
-import time
-import timeit
 
 
 class Card:
@@ -18,41 +16,39 @@ class Card:
 
 def seek_best(cards_):
     a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
-    hand_ = []
+    print(a_high)
 
-    # def f1():
-    #
-    # def f2():
-    #
-    # print(timeit.timeit(f1))
-    # print(timeit.timeit(f2))
-
-    i = 0
-    for j in range(1, len(a_high)):
-        next_ = j + 1
-        if Card.ranks[a_high[i].rank][-1] == Card.ranks[a_high[j].rank][-1]:
-            if i + 4 == next_:
-                hand_ = a_high[i:next_]
-                if i == 0:
-                    hand_.append(a_high[next_])
+    hand_ = [a_high[0]]
+    for i_ in range(1, len(a_high)):
+        current = a_high[i_]
+        j = i_ + 1
+        if Card.ranks[current.rank][-1] == Card.ranks[hand_[-1].rank][-1]:
+            hand_.append(current)
+            if len(hand_) == 4:
+                k = i_ - 3
+                hand_ = a_high[k:j]
+                if k == 0:
+                    hand_.append(a_high[j])
                 else:
                     hand_.append(a_high[0])
                 return 'Four of a kind', hand_
         else:
-            i = j
-        if len(a_high) - next_ < 4 - len(hand_):
+            hand_.clear()
+            hand_.append(current)
+        if len(a_high) - j < 4 - len(hand_):
             break
 
     return None, None
 
 
-deck = []
-for rank in Card.ranks:
-    for suit in Card.suits:
-        deck.append(Card(rank, suit))
-
-name = None
+i = 0
 while True:
+    deck = []
+    for rank in Card.ranks:
+        for suit in Card.suits:
+            deck.append(Card(rank, suit))
+
+    random.seed(i)
     random.shuffle(deck)
 
     holes = tuple([deck.pop() for _ in range(2)] for _ in range(1))
@@ -64,19 +60,11 @@ while True:
 
     for hole in holes:
         cards = hole + community
-        t = time.perf_counter_ns()
         name, hand = seek_best(cards)
-        if name:
-            print(time.perf_counter_ns() - t)
-            print(name, hand, cards)
+        if name == 'Four of a kind':
+            print(i, name, hand, cards)
             break
-    if name:
-        break
-
-    for hole in holes:
-        while hole:
-            deck.append(hole.pop())
-    while burn:
-        deck.append(burn.pop())
-    while community:
-        deck.append(community.pop())
+    else:
+        i += 1
+        continue
+    break
