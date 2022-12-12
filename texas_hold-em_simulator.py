@@ -20,11 +20,12 @@ class Card:
 def seek_best(cards_):
     # High Straight flush
     a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
-    first = a_high[0]
+    first_high = a_high[0]
     rank_five = Card.ranks['5'][-1]
-    if Card.ranks[first.rank][-1] > rank_five:
-        hand_ = [first]
-        for i_ in range(1, len(a_high)):
+    length_cards = len(cards_)
+    if Card.ranks[first_high.rank][-1] > rank_five:
+        hand_ = [first_high]
+        for i_ in range(1, length_cards):
             current = a_high[i_]
             previous = hand_[-1]
             rank_current = Card.ranks[current.rank][-1]
@@ -38,16 +39,16 @@ def seek_best(cards_):
                     break
                 hand_.clear()
                 hand_.append(current)
-            if len(a_high) - (i_ + 1) < 5 - len(hand_):
+            if length_cards - (i_ + 1) < 5 - len(hand_):
                 break
 
     # Lowest Straight flush
     a_low = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][0], reverse=True)
-    first = a_low[0]
+    first_low = a_low[0]
     rank_five = Card.ranks['5'][0]
-    if Card.ranks[first.rank][0] == rank_five:
-        hand_ = [first]
-        for i_ in range(1, len(a_low)):
+    if Card.ranks[first_low.rank][0] == rank_five:
+        hand_ = [first_low]
+        for i_ in range(1, length_cards):
             current = a_low[i_]
             previous = hand_[-1]
             rank_current = Card.ranks[current.rank][0]
@@ -61,12 +62,12 @@ def seek_best(cards_):
                     break
                 hand_.clear()
                 hand_.append(current)
-            if len(a_low) - (i_ + 1) < 5 - len(hand_):
+            if length_cards - (i_ + 1) < 5 - len(hand_):
                 break
 
     # Four of a kind
-    hand_ = [a_high[0]]
-    for i_ in range(1, len(a_high)):
+    hand_ = [first_high]
+    for i_ in range(1, length_cards):
         current = a_high[i_]
         j = i_ + 1
         if Card.ranks[current.rank][-1] == Card.ranks[hand_[-1].rank][-1]:
@@ -82,14 +83,14 @@ def seek_best(cards_):
         else:
             hand_.clear()
             hand_.append(current)
-        if len(a_high) - j < 4 - len(hand_):
+        if length_cards - j < 4 - len(hand_):
             break
 
     # Full house
     hand_.clear()
-    hand_.append(a_high[0])
+    hand_.append(first_high)
     sub_hand = []
-    for i_ in range(1, len(a_high)):
+    for i_ in range(1, length_cards):
         current = a_high[i_]
         length_sub = len(sub_hand)
         if Card.ranks[current.rank][-1] == Card.ranks[hand_[-1].rank][-1]:
@@ -110,6 +111,8 @@ def seek_best(cards_):
                         sub_hand.append(card)
                 hand_.clear()
             hand_.append(current)
+        if length_cards - (i_ + 1) < 5 - (len(hand_) + len(sub_hand)):
+            break
 
     # Flush
 
@@ -134,7 +137,7 @@ for rank in Card.ranks:
 
 players = 22
 counter = Counter()
-for i in range(10000):
+for i in range(50000):
     random.shuffle(deck)
 
     holes = tuple([deck.pop() for _ in range(2)] for _ in range(players))

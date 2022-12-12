@@ -16,32 +16,42 @@ class Card:
 
 def seek_best(cards_):
     a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
-    print(a_high)
+    first = a_high[0]
+    length_cards = len(cards_)
+    hand_ = [first]
 
-    hand_ = [a_high[0]]
-    for i_ in range(1, len(a_high)):
+    print(a_high)
+    hand_.clear()
+    hand_.append(first)
+    sub_hand = []
+    for i_ in range(1, length_cards):
         current = a_high[i_]
-        j = i_ + 1
+        length_sub = len(sub_hand)
         if Card.ranks[current.rank][-1] == Card.ranks[hand_[-1].rank][-1]:
             hand_.append(current)
-            if len(hand_) == 4:
-                k = i_ - 3
-                hand_ = a_high[k:j]
-                if k == 0:
-                    hand_.append(a_high[j])
-                else:
-                    hand_.append(a_high[0])
-                return 'Four of a kind', hand_
+            length_hand = len(hand_)
+            if length_hand == 5:
+                return 'Full house', hand_
+            if length_hand == 3 and length_sub == 2:
+                hand_.extend(sub_hand)
+                return 'Full house', hand_
         else:
-            hand_.clear()
+            length_hand = len(hand_)
+            if length_hand in (4, 1):
+                hand_.pop()
+            elif length_hand == 2:
+                if length_sub == 0:
+                    for card in hand_:
+                        sub_hand.append(card)
+                hand_.clear()
             hand_.append(current)
-        if len(a_high) - j < 4 - len(hand_):
+        if length_cards - (i_ + 1) < 5 - (len(hand_) + len(sub_hand)):
             break
 
     return None, None
 
 
-i = 0
+i = 144
 while True:
     deck = []
     for rank in Card.ranks:
@@ -61,7 +71,7 @@ while True:
     for hole in holes:
         cards = hole + community
         name, hand = seek_best(cards)
-        if name == 'Four of a kind':
+        if name == 'Full house':
             print(i, name, hand, cards)
             break
     else:
