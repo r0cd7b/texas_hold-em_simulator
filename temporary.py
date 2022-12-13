@@ -48,7 +48,7 @@ def seek_best(cards_):
     return None, None
 
 
-seed = 10
+seed = 0
 while True:
     deck = []
     for rank in Card.ranks:
