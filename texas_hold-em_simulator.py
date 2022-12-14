@@ -21,8 +21,9 @@ def seek_best(cards_):
     # High Straight flush
     suit_higher = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
     i = 0
-    five_rank = Card.ranks['5'][-1]
-    if Card.ranks[suit_higher[i].rank][-1] > five_rank:
+    five_rank = Card.ranks['5']
+    five = five_rank[-1]
+    if Card.ranks[suit_higher[i].rank][-1] > five:
         for j in range(1, len(cards_)):
             first_card = suit_higher[i]
             current_rank = Card.ranks[suit_higher[j].rank][-1]
@@ -31,7 +32,7 @@ def seek_best(cards_):
                 next_j = j + 1
                 if next_j - i >= 5:
                     return 'Straight flush', suit_higher[i:next_j]
-            elif current_rank <= five_rank or len(cards_) - j < 5:
+            elif current_rank <= five or len(cards_) - j < 5:
                 break
             else:
                 i = j
@@ -39,15 +40,15 @@ def seek_best(cards_):
     # Lowest Straight flush
     suit_lower = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][0]), reverse=True)
     i = 0
-    five_rank = Card.ranks['5'][0]
-    if Card.ranks[suit_lower[i].rank][0] == five_rank:
+    five = five_rank[0]
+    if Card.ranks[suit_lower[i].rank][0] == five:
         for j in range(1, len(cards_)):
             current_rank = Card.ranks[suit_lower[j].rank][0]
             if Card.ranks[suit_lower[i].rank][0] == current_rank + (j - i) and suit_lower[i].suit == suit_lower[j].suit:
                 next_j = j + 1
                 if next_j - i >= 5:
                     return 'Straight flush', suit_lower[i:next_j]
-            elif current_rank != five_rank or len(cards_) - j < 5:
+            elif current_rank != five or len(cards_) - j < 5:
                 break
             else:
                 i = j
