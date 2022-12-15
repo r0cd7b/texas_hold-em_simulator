@@ -16,30 +16,38 @@ class Card:
 
 
 def seek_best(cards_):
-    def f1():
-        sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
+    # def f1():
+    #
+    # def f2():
+    #
+    # print(timeit.timeit(f1))
+    # print(timeit.timeit(f2))
+    # print()
 
-    def f2():
-        sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
-
-    print(timeit.timeit(f1))
-    print(timeit.timeit(f2))
-    print()
-
-    a_high_suit = sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
-    hand_ = []
+    a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
+    hand_1, hand_2 = [], []
     breakpoint_ = len(cards_) - 5
-    for i, card in enumerate(a_high_suit):
-        if i - len(hand_) > breakpoint_:
+    for i, card in enumerate(a_high):
+        if i - len(hand_1) - len(hand_2) > breakpoint_:
             break
-        if not hand_:
-            hand_.append(card)
-        elif card.suit != hand_[-1].suit:
-            hand_ = [card]
+        if not hand_1:
+            hand_1.append(card)
         else:
-            hand_.append(card)
-            if len(hand_) == 5:
-                return 'Flush', hand_
+            if Card.ranks[card.rank][-1] != Card.ranks[hand_1[-1].rank][-1]:
+                if len(hand_1) == 1:
+                    hand_1 = [card]
+                elif len(hand_1) == 2:
+                    if hand_2:
+                        hand_1 = [card]
+                    else:
+                        hand_2 = hand_1
+                        hand_1 = []
+                elif len(hand_1) == 3:
+
+            else:
+                hand_.append(card)
+                if len(hand_) == 5:
+                    return 'Flush', hand_
 
     return None, None
 
