@@ -25,8 +25,24 @@ def seek_best(cards_):
     # print()
 
     a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
+    cards = a_high.copy()
+    cards = []
+    for length in (3, 2):
+        sub_hand = []
+        breakpoint_ = len(a_high) - 5
+        for i, card in enumerate(a_high):
+            if i - len(hand_) > breakpoint_:
+                break
+            if not hand_:
+                hand_.append(card)
+            elif card.suit != hand_[-1].suit:
+                hand_ = [card]
+            else:
+                hand_.append(card)
+                if len(hand_) == 5:
+                    return 'Flush', hand_
+
     hand_1, hand_2 = [], []
-    breakpoint_ = len(cards_) - 5
     for i, card in enumerate(a_high):
         if i - len(hand_1) - len(hand_2) > breakpoint_:
             break
