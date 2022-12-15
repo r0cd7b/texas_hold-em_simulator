@@ -1,4 +1,5 @@
 import random
+import timeit
 
 
 class Card:
@@ -15,6 +16,31 @@ class Card:
 
 
 def seek_best(cards_):
+    def f1():
+        sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
+
+    def f2():
+        sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
+
+    print(timeit.timeit(f1))
+    print(timeit.timeit(f2))
+    print()
+
+    a_high_suit = sorted(cards_, key=lambda card_: (Card.ranks[card_.rank][-1], card_.suit), reverse=True)
+    hand_ = []
+    breakpoint_ = len(cards_) - 5
+    for i, card in enumerate(a_high_suit):
+        if i - len(hand_) > breakpoint_:
+            break
+        if not hand_:
+            hand_.append(card)
+        elif card.suit != hand_[-1].suit:
+            hand_ = [card]
+        else:
+            hand_.append(card)
+            if len(hand_) == 5:
+                return 'Flush', hand_
+
     return None, None
 
 

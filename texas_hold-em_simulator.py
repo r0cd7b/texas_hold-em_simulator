@@ -102,20 +102,64 @@ def seek_best(cards_):
             k = m
 
     # Flush
-    i = 0
-    for j in range(1, len(cards_)):
-        if suit_higher[i].suit == suit_higher[j].suit:
-            next_j = j + 1
-            if next_j - i >= 5:
-                return 'Flush', suit_higher[i:next_j]
-        elif len(cards_) - j < 5:
+    suit_a_high = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
+    hand_ = []
+    breakpoint_ = len(cards_) - 5
+    for i, card in enumerate(suit_a_high):
+        if i - len(hand_) > breakpoint_:
             break
+        if not hand_:
+            hand_.append(card)
+        elif card.suit != hand_[-1].suit:
+            hand_ = [card]
         else:
-            i = j
+            hand_.append(card)
+            if len(hand_) == 5:
+                return 'Flush', hand_
 
     # High Straight
+    a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
+    hand_ = []
+    rank_five = Card.ranks['5'][-1]
+    for i, card in enumerate(a_high):
+        if i - len(hand_) > breakpoint_:
+            break
+        rank_card = Card.ranks[card.rank][-1]
+        if not hand_:
+            if rank_card <= rank_five:
+                break
+            hand_.append(card)
+        else:
+            rank_last = Card.ranks[hand_[-1].rank][-1]
+            if rank_card < rank_last - 1:
+                if rank_card <= rank_five:
+                    break
+                hand_ = [card]
+            elif rank_card < rank_last:
+                hand_.append(card)
+                if len(hand_) == 5:
+                    return 'Straight', hand_
 
     # Lowest Straight
+    a_low = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][0], reverse=True)
+    hand_ = []
+    for i, card in enumerate(a_low):
+        if i - len(hand_) > breakpoint_:
+            break
+        rank_card = Card.ranks[card.rank][0]
+        if not hand_:
+            if rank_card < rank_five:
+                break
+            if rank_card == rank_five:
+                hand_.append(card)
+        else:
+            rank_last = Card.ranks[hand_[-1].rank][0]
+            if rank_card < rank_last - 1:
+                break
+            if rank_card < rank_last:
+                hand_.append(card)
+                if len(hand_) == 5:
+                    return 'Straight', hand_
 
     # Three of a kind
 
@@ -134,7 +178,7 @@ for rank in Card.ranks:
 
 players = 22
 counter = Counter()
-for _ in range(40000):
+for _ in range(30000):
     random.shuffle(deck)
 
     holes = tuple([deck.pop() for _ in range(2)] for _ in range(players))
