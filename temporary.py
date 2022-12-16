@@ -25,50 +25,33 @@ def seek_best(cards_):
     # print()
 
     a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
-    cards = a_high.copy()
-    cards = []
-    for length in (3, 2):
-        sub_hand = []
-        breakpoint_ = len(a_high) - 5
-        for i, card in enumerate(a_high):
-            if i - len(hand_) > breakpoint_:
+    cards_check = a_high.copy()
+    hand_ = []
+    for length_combinations in (3, 2):
+        length_check = len(cards_check)
+        sub_hand = [cards_check[0]]
+        breakpoint_ = length_check - length_combinations
+        cards_rest = []
+        for i in range(1, length_check):
+            if i - len(sub_hand) > breakpoint_:
                 break
-            if not hand_:
-                hand_.append(card)
-            elif card.suit != hand_[-1].suit:
-                hand_ = [card]
+            card = cards_check[i]
+            if len(sub_hand) >= length_combinations:
+                cards_rest.append(card)
+            elif card.suit == sub_hand[-1].suit:
+                sub_hand.append(card)
             else:
-                hand_.append(card)
-                if len(hand_) == 5:
-                    return 'Flush', hand_
-
-    hand_1, hand_2 = [], []
-    for i, card in enumerate(a_high):
-        if i - len(hand_1) - len(hand_2) > breakpoint_:
-            break
-        if not hand_1:
-            hand_1.append(card)
+                sub_hand = [card]
         else:
-            if Card.ranks[card.rank][-1] != Card.ranks[hand_1[-1].rank][-1]:
-                if len(hand_1) == 1:
-                    hand_1 = [card]
-                elif len(hand_1) == 2:
-                    if hand_2:
-                        hand_1 = [card]
-                    else:
-                        hand_2 = hand_1
-                        hand_1 = []
-                elif len(hand_1) == 3:
-
-            else:
-                hand_.append(card)
-                if len(hand_) == 5:
-                    return 'Flush', hand_
+            cards_check = cards_rest
+            hand_.extend(sub_hand)
+            continue
+        break
 
     return None, None
 
 
-seed = 0
+seed = 18
 while True:
     deck = []
     for rank in Card.ranks:

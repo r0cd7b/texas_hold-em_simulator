@@ -103,63 +103,52 @@ def seek_best(cards_):
 
     # Flush
     suit_a_high = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
-    hand_ = []
+    length = len(cards_)
+    hand_ = [suit_a_high[0]]
     breakpoint_ = len(cards_) - 5
-    for i, card in enumerate(suit_a_high):
+    for i in range(1, length):
         if i - len(hand_) > breakpoint_:
             break
-        if not hand_:
-            hand_.append(card)
-        elif card.suit != hand_[-1].suit:
-            hand_ = [card]
-        else:
+        card = suit_a_high[i]
+        if card.suit == hand_[-1].suit:
             hand_.append(card)
             if len(hand_) == 5:
                 return 'Flush', hand_
+        else:
+            hand_ = [card]
 
     # High Straight
     a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
-    hand_ = []
+    hand_ = [a_high[0]]
     rank_five = Card.ranks['5'][-1]
-    for i, card in enumerate(a_high):
-        if i - len(hand_) > breakpoint_:
+    for i in range(1, length):
+        if Card.ranks[hand_[0].rank][-1] <= rank_five or i - len(hand_) > breakpoint_:
             break
+        card = a_high[i]
         rank_card = Card.ranks[card.rank][-1]
-        if not hand_:
-            if rank_card <= rank_five:
-                break
+        rank_last = Card.ranks[hand_[-1].rank][-1]
+        if rank_card == rank_last - 1:
             hand_.append(card)
-        else:
-            rank_last = Card.ranks[hand_[-1].rank][-1]
-            if rank_card < rank_last - 1:
-                if rank_card <= rank_five:
-                    break
-                hand_ = [card]
-            elif rank_card < rank_last:
-                hand_.append(card)
-                if len(hand_) == 5:
-                    return 'Straight', hand_
+            if len(hand_) == 5:
+                return 'Straight', hand_
+        elif rank_card < rank_last:
+            hand_ = [card]
 
     # Lowest Straight
     a_low = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][0], reverse=True)
-    hand_ = []
-    for i, card in enumerate(a_low):
-        if i - len(hand_) > breakpoint_:
+    hand_ = [a_low[0]]
+    for i in range(1, length):
+        if Card.ranks[hand_[0].rank][0] != rank_five or i - len(hand_) > breakpoint_:
             break
+        card = a_low[i]
         rank_card = Card.ranks[card.rank][0]
-        if not hand_:
-            if rank_card < rank_five:
-                break
-            if rank_card == rank_five:
-                hand_.append(card)
-        else:
-            rank_last = Card.ranks[hand_[-1].rank][0]
-            if rank_card < rank_last - 1:
-                break
-            if rank_card < rank_last:
-                hand_.append(card)
-                if len(hand_) == 5:
-                    return 'Straight', hand_
+        rank_last = Card.ranks[hand_[-1].rank][0]
+        if rank_card == rank_last - 1:
+            hand_.append(card)
+            if len(hand_) == 5:
+                return 'Straight', hand_
+        elif rank_card < rank_last:
+            hand_ = [card]
 
     # Three of a kind
 
@@ -168,7 +157,7 @@ def seek_best(cards_):
     # Pair
 
     # High card
-    return 'High card', higher_suit[:5]
+    return 'High card', a_high[:5]
 
 
 deck = []
