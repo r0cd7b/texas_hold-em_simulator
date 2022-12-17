@@ -72,40 +72,45 @@ def seek_best(cards_):
             i = j
 
     # Full house
-    i = j = k = 0
-    for m in range(1, len(cards_)):
-        length_front = j - i
-        if Card.ranks[higher_suit[k].rank][-1] == Card.ranks[higher_suit[m].rank][-1]:
-            next_m = m + 1
-            length_back = next_m - k
-            front_part = higher_suit[i:j]
-            back_part = higher_suit[k:next_m]
-            if length_front >= 3:
-                if length_back == 2:
-                    front_part.extend(back_part)
-                    return 'Full house', front_part
-            elif length_front == 2:
-                if length_back >= 3:
-                    back_part.extend(front_part)
-                    return 'Full house', back_part
+    a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
+    length_cards = len(cards_)
+    hand_ = [a_high[0]]
+    breakpoint_ = length_cards - 5
+    pair_later = False
+    for i in range(1, length_cards):
+        length_hand = len(hand_)
+        if i - length_hand > breakpoint_:
+            break
+        card = a_high[i]
+        if Card.ranks[card.rank][-1] == Card.ranks[hand_[-1].rank][-1]:
+            hand_.append(card)
+            if len(hand_) >= 5:
+                if pair_later:
+                    return 'Full house', hand_
+                return 'Full house', hand_[2:] + hand_[:2]
+            if len(hand_) == 3:
+                pair_later = True
+        elif length_hand > 3:
+            if pair_later:
+                hand_[3] = card
+            else:
+                hand_[2] = card
+                hand_.pop()
+        elif length_hand == 3:
+            if pair_later:
+                hand_.append(card)
+            else:
+                hand_[2] = card
+        elif length_hand >= 2:
+            hand_.append(card)
         else:
-            if length_front < 2:
-                length_back = m - k
-                if length_back >= 3:
-                    i = k
-                    j = i + 3
-                elif length_back == 2:
-                    i = k
-                    j = i + 2
-            if len(cards_) - m < 5 - (j - i):
-                break
-            k = m
+            hand_ = [card]
 
     # Flush
     suit_a_high = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
     length = len(cards_)
     hand_ = [suit_a_high[0]]
-    breakpoint_ = len(cards_) - 5
+    breakpoint_ = length - 5
     for i in range(1, length):
         if i - len(hand_) > breakpoint_:
             break

@@ -24,34 +24,10 @@ def seek_best(cards_):
     # print(timeit.timeit(f2))
     # print()
 
-    a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
-    cards_check = a_high.copy()
-    hand_ = []
-    for length_combinations in (3, 2):
-        length_check = len(cards_check)
-        sub_hand = [cards_check[0]]
-        breakpoint_ = length_check - length_combinations
-        cards_rest = []
-        for i in range(1, length_check):
-            if i - len(sub_hand) > breakpoint_:
-                break
-            card = cards_check[i]
-            if len(sub_hand) >= length_combinations:
-                cards_rest.append(card)
-            elif card.suit == sub_hand[-1].suit:
-                sub_hand.append(card)
-            else:
-                sub_hand = [card]
-        else:
-            cards_check = cards_rest
-            hand_.extend(sub_hand)
-            continue
-        break
-
     return None, None
 
 
-seed = 18
+seed = 15
 while True:
     deck = []
     for rank in Card.ranks:
