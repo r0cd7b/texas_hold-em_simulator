@@ -108,10 +108,8 @@ def seek_best(cards_):
 
     # Flush
     suit_a_high = sorted(cards_, key=lambda card_: (card_.suit, Card.ranks[card_.rank][-1]), reverse=True)
-    length = len(cards_)
     hand_ = [suit_a_high[0]]
-    breakpoint_ = length - 5
-    for i in range(1, length):
+    for i in range(1, length_cards):
         if i - len(hand_) > breakpoint_:
             break
         card = suit_a_high[i]
@@ -123,10 +121,9 @@ def seek_best(cards_):
             hand_ = [card]
 
     # High Straight
-    a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
     hand_ = [a_high[0]]
     rank_five = Card.ranks['5'][-1]
-    for i in range(1, length):
+    for i in range(1, length_cards):
         if Card.ranks[hand_[0].rank][-1] <= rank_five or i - len(hand_) > breakpoint_:
             break
         card = a_high[i]
@@ -142,7 +139,7 @@ def seek_best(cards_):
     # Lowest Straight
     a_low = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][0], reverse=True)
     hand_ = [a_low[0]]
-    for i in range(1, length):
+    for i in range(1, length_cards):
         if Card.ranks[hand_[0].rank][0] != rank_five or i - len(hand_) > breakpoint_:
             break
         card = a_low[i]
