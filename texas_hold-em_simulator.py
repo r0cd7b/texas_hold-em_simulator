@@ -84,11 +84,12 @@ def seek_best(cards_):
         card = a_high[i]
         if Card.ranks[card.rank][-1] == Card.ranks[hand_[-1].rank][-1]:
             hand_.append(card)
-            if len(hand_) >= 5:
+            length_hand = len(hand_)
+            if length_hand >= 5:
                 if pair_later:
                     return 'Full house', hand_
                 return 'Full house', hand_[2:] + hand_[:2]
-            if len(hand_) == 3:
+            if length_hand == 3:
                 pair_later = True
         elif length_hand > 3:
             if pair_later:

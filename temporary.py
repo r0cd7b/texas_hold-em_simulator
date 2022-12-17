@@ -24,6 +24,41 @@ def seek_best(cards_):
     # print(timeit.timeit(f2))
     # print()
 
+    a_high = sorted(cards_, key=lambda card_: Card.ranks[card_.rank][-1], reverse=True)
+    length_cards = len(cards_)
+    hand_ = [a_high[0]]
+    breakpoint_ = length_cards - 5
+    pair_later = False
+    for i in range(1, length_cards):
+        length_hand = len(hand_)
+        if i - length_hand > breakpoint_:
+            break
+        card = a_high[i]
+        if Card.ranks[card.rank][-1] == Card.ranks[hand_[-1].rank][-1]:
+            hand_.append(card)
+            length_hand = len(hand_)
+            if length_hand >= 5:
+                if pair_later:
+                    return 'Full house', hand_
+                return 'Full house', hand_[2:] + hand_[:2]
+            if length_hand == 3:
+                pair_later = True
+        elif length_hand > 3:
+            if pair_later:
+                hand_[3] = card
+            else:
+                hand_[2] = card
+                hand_.pop()
+        elif length_hand == 3:
+            if pair_later:
+                hand_.append(card)
+            else:
+                hand_[2] = card
+        elif length_hand >= 2:
+            hand_.append(card)
+        else:
+            hand_ = [card]
+
     return None, None
 
 
